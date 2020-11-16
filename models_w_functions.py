@@ -241,6 +241,22 @@ def get_trained_MultinomialNB(training_X, training_Y):
     model.fit(training_X, training_Y)
     return model
 
+#### START EXTRA CREDIT ####
+# returns a trained MLP Classifier
+def get_trained_MLPClassifier(training_X, training_Y):
+    from sklearn.neural_network import MLPClassifier
+    model = MLPClassifier(random_state=3)
+    model.fit(training_X, training_Y)
+    return model
+
+# returns a trained MLP Regressor
+def get_trained_MLPRegressor(training_X, training_Y):
+    from sklearn.neural_network import MLPRegressor
+    model = MLPRegressor(random_state=3)
+    model.fit(training_X, training_Y)
+    return model
+#### END EXTRA CREDIT ####
+
 # returns a trained Gradient Boosting Classifier Model
 def get_trained_GBC(training_X, training_Y):
     from sklearn.ensemble import GradientBoostingClassifier

@@ -97,24 +97,21 @@ models["GB_summaries"] = GBC_summaries
 GBC_bodies = get_trained_GBC_bodies(processed_bodies_inner_train, y_inner_train)
 models['GB_bodies'] = GBC_bodies
 
+#### START EXTRA CREDIT ####
+print('MLPClassifier')
+## Create and train MLP classifier
 
-print("starting SVM")
+MLPC_summaries = get_trained_MLPClassifier(processed_summaries_inner_train, y_inner_train)
+MLPC_bodies = get_trained_MLPClassifier(processed_bodies_inner_train, y_inner_train)
 
-## Outer SVM
+print('MLPRegressor')
+## Create and train MLP Regressor
 
-#process training features
-SVM_training_features = get_SVM_features(models, processed_summaries_outer_train, processed_bodies_outer_train, X_outer_train)
-SVM_training_features["NumberReviews"] = X_outer_train['Number of Reviews'].values
-# SVM_training_features.to_csv("SVM_training_features_q3.csv", index=False)
-# y_outer_train.to_csv("SVM_train_Y_q3.csv", index=False)
+MLPR_summaries = get_trained_MLPRegressor(processed_summaries_inner_train, y_inner_train)
+MLPR_bodies = get_trained_MLPRegressor(processed_bodies_inner_train, y_inner_train)
 
-from sklearn import svm
-# check result metrics of 10 fold cv
-cv_predictions = tenFoldCV_Predict(svm.SVC(kernel='rbf'), SVM_training_features, y_outer_train)
-print(classification_report(cv_predictions, y_outer_train))
-
-# get model trained on all of training set to make predictions on unlabeled test set
-final_SVM = get_trained_SVM(SVM_training_features, y_outer_train)
+# Create output string to hold 10foldcv results
+outputString = ""
 
 # read in testing features (processed to a per product basis)
 test = pd.read_csv('Groceries_Processed_Test_Data.csv')
@@ -126,18 +123,60 @@ del test['Unnamed: 0']
 processed_test_bodies = process_TFIDF_bow(review_body_vectorizer, test['Reviews'])
 processed_test_summaries = process_TFIDF_bow(review_summary_vectorizer, test['Summaries'])
 
-# get all final SVM features, add model predictions
-SVM_testing_features = get_SVM_features(models, processed_test_summaries, processed_test_bodies, test)
-print(SVM_testing_features.columns)
-print(SVM_testing_features.head())
-SVM_testing_features['Number of Reviews'] = test['Number of Reviews'].values
+# Loop through final SVM training 3 times, once with just MLPClassifier, once with just MLPRegressor, and once with both
+for i in range(3):
+    MLPlabels = ['MLPC_summaries','MLPC_bodies','MLPR_summaries','MLPR_bodies']
+    
+    # remove MLP models from models dict if they are in models dict (pop doesn't throw a keyerror)
+    for l in MLPlabels:
+        models.pop(l, None)
+    
+    # add MLPClassifier if first or third iteration
+    if i == 0 or i == 2:
+        models["MLPC_summaries"] = MLPC_summaries
+        models['MLPC_bodies'] = MLPC_bodies
 
-# get trained final SVM
-final_SVM = get_trained_SVM(SVM_training_features, y_outer_train)
-final_predictions = test[['ProductID']]
+    # add MLPRegressor if second or third iteration
+    if i == 1 or i == 2:
+        models["MLPR_summaries"] = MLPR_summaries
+        models['MLPR_bodies'] = MLPR_bodies
 
-# make predictions
-final_predictions['Awesome?'] = final_SVM.predict(SVM_testing_features)
+    print("starting SVM phase " + str(i))
 
-# output to csv
-final_predictions.to_csv('Deliverable4_Test_Set_Predictions.csv', index=False)
+    ## Outer SVM
+
+    #process training features
+    SVM_training_features = get_SVM_features(models, processed_summaries_outer_train, processed_bodies_outer_train, X_outer_train)
+    SVM_training_features["NumberReviews"] = X_outer_train['Number of Reviews'].values
+    # SVM_training_features.to_csv("SVM_training_features_q3.csv", index=False)
+    # y_outer_train.to_csv("SVM_train_Y_q3.csv", index=False)
+
+    from sklearn import svm
+    # check result metrics of 10 fold cv
+    cv_predictions = tenFoldCV_Predict(svm.SVC(kernel='rbf'), SVM_training_features, y_outer_train)
+    printOptions = ["With MLPClassifier", "With MLPRegressor", "With MLPClassifier & MLPRegressor"]
+    outputString += printOptions[i] + "\n\n" + str(classification_report(cv_predictions, y_outer_train)) + "\n\n\n\n"
+
+    # get model trained on all of training set to make predictions on unlabeled test set
+    final_SVM = get_trained_SVM(SVM_training_features, y_outer_train)
+
+    # get all final SVM features, add model predictions
+    SVM_testing_features = get_SVM_features(models, processed_test_summaries, processed_test_bodies, test)
+    SVM_testing_features['Number of Reviews'] = test['Number of Reviews'].values
+
+    # get trained final SVM
+    final_SVM = get_trained_SVM(SVM_training_features, y_outer_train)
+    final_predictions = test[['ProductID']]
+
+    # make predictions
+    final_predictions['Awesome?'] = final_SVM.predict(SVM_testing_features)
+
+    # output to csv, include proper file name for given iteration
+    fileOptions = ["MLPClassifier", "MLPRegressor", "MLPClassifier_And_MLPRegressor"]
+    final_predictions.to_csv('Deliverable4_Test_Set_Predictions_%s.csv' % fileOptions[i], index=False)
+
+# Output 10foldCV results to txt file
+f1ResultsFile = open('10FoldCV_Results.txt', 'w')
+f1ResultsFile.write(outputString)
+f1ResultsFile.close()
+#### END EXTRA CREDIT ####
