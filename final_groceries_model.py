@@ -98,17 +98,19 @@ GBC_bodies = get_trained_GBC_bodies(processed_bodies_inner_train, y_inner_train)
 models['GB_bodies'] = GBC_bodies
 
 #### START EXTRA CREDIT ####
-print('MLPClassifier')
+print('gbc')
 ## Create and train MLP classifier
 
 MLPC_summaries = get_trained_MLPClassifier(processed_summaries_inner_train, y_inner_train)
 MLPC_bodies = get_trained_MLPClassifier(processed_bodies_inner_train, y_inner_train)
 
-print('MLPRegressor')
-## Create and train MLP Regressor
+print('MLPClassifier')
+## Create and train DecisionTreeClassifier
 
-MLPR_summaries = get_trained_MLPRegressor(processed_summaries_inner_train, y_inner_train)
-MLPR_bodies = get_trained_MLPRegressor(processed_bodies_inner_train, y_inner_train)
+DTC_summaries = get_trained_DecisionTreeClassifier(processed_summaries_inner_train, y_inner_train)
+DTC_bodies = get_trained_DecisionTreeClassifier(processed_bodies_inner_train, y_inner_train)
+
+print('DecisionTreeClassifier')
 
 # Create output string to hold 10foldcv results
 outputString = ""
@@ -123,23 +125,23 @@ del test['Unnamed: 0']
 processed_test_bodies = process_TFIDF_bow(review_body_vectorizer, test['Reviews'])
 processed_test_summaries = process_TFIDF_bow(review_summary_vectorizer, test['Summaries'])
 
-# Loop through final SVM training 3 times, once with just MLPClassifier, once with just MLPRegressor, and once with both
-for i in range(3):
-    MLPlabels = ['MLPC_summaries','MLPC_bodies','MLPR_summaries','MLPR_bodies']
+# Loop through final SVM training 4 times, once with no new classifiers, once with just MLPClassifier, once with just DecisionTreeClassifier, and once with both
+for i in range(4):
+    labels = ['MLPC_summaries','MLPC_bodies','DTC_summaries','DTC_bodies']
     
-    # remove MLP models from models dict if they are in models dict (pop doesn't throw a keyerror)
-    for l in MLPlabels:
+    # remove new models from models dict if they are in models dict (pop doesn't throw a keyerror)
+    for l in labels:
         models.pop(l, None)
     
-    # add MLPClassifier if first or third iteration
-    if i == 0 or i == 2:
-        models["MLPC_summaries"] = MLPC_summaries
-        models['MLPC_bodies'] = MLPC_bodies
+    # add MLPClassifier if second or fourth iteration
+    if i == 1 or i == 3:
+        models[labels[0]] = MLPC_summaries
+        models[labels[1]] = MLPC_bodies
 
-    # add MLPRegressor if second or third iteration
-    if i == 1 or i == 2:
-        models["MLPR_summaries"] = MLPR_summaries
-        models['MLPR_bodies'] = MLPR_bodies
+    # add DecisionTreeClassifier if third or fourth iteration
+    if i == 2 or i == 3:
+        models[labels[2]] = DTC_summaries
+        models[labels[3]] = DTC_bodies
 
     print("starting SVM phase " + str(i))
 
@@ -154,7 +156,7 @@ for i in range(3):
     from sklearn import svm
     # check result metrics of 10 fold cv
     cv_predictions = tenFoldCV_Predict(svm.SVC(kernel='rbf'), SVM_training_features, y_outer_train)
-    printOptions = ["With MLPClassifier", "With MLPRegressor", "With MLPClassifier & MLPRegressor"]
+    printOptions = ["No New Classifiers", "With MLPClassifier", "With DecisionTreeClassifier", "With MLPClassifier & DecisionTreeClassifier"]
     outputString += printOptions[i] + "\n\n" + str(classification_report(cv_predictions, y_outer_train)) + "\n\n\n\n"
 
     # get model trained on all of training set to make predictions on unlabeled test set
@@ -172,7 +174,7 @@ for i in range(3):
     final_predictions['Awesome?'] = final_SVM.predict(SVM_testing_features)
 
     # output to csv, include proper file name for given iteration
-    fileOptions = ["MLPClassifier", "MLPRegressor", "MLPClassifier_And_MLPRegressor"]
+    fileOptions = ["No_New_Classifiers", "MLPClassifier", "DecisionTreeClassifier", "MLPClassifier_And_DecisionTreeClassifier"]
     final_predictions.to_csv('Deliverable4_Test_Set_Predictions_%s.csv' % fileOptions[i], index=False)
 
 # Output 10foldCV results to txt file

@@ -1,0 +1,56 @@
+No New Classifiers
+
+              precision    recall  f1-score   support
+
+         0.0       0.77      0.84      0.80      5352
+         1.0       0.88      0.83      0.86      7871
+
+    accuracy                           0.84     13223
+   macro avg       0.83      0.84      0.83     13223
+weighted avg       0.84      0.84      0.84     13223
+
+
+
+
+With MLPClassifier
+
+              precision    recall  f1-score   support
+
+         0.0       0.78      0.84      0.81      5419
+         1.0       0.88      0.84      0.86      7804
+
+    accuracy                           0.84     13223
+   macro avg       0.83      0.84      0.84     13223
+weighted avg       0.84      0.84      0.84     13223
+
+
+
+
+With DecisionTreeClassifier
+
+              precision    recall  f1-score   support
+
+         0.0       0.77      0.84      0.80      5372
+         1.0       0.88      0.83      0.86      7851
+
+    accuracy                           0.83     13223
+   macro avg       0.83      0.84      0.83     13223
+weighted avg       0.84      0.83      0.84     13223
+
+
+
+
+With MLPClassifier & DecisionTreeClassifier
+
+              precision    recall  f1-score   support
+
+         0.0       0.78      0.84      0.81      5387
+         1.0       0.88      0.84      0.86      7836
+
+    accuracy                           0.84     13223
+   macro avg       0.83      0.84      0.84     13223
+weighted avg       0.84      0.84      0.84     13223
+
+
+
+

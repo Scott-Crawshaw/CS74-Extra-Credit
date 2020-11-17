@@ -249,10 +249,10 @@ def get_trained_MLPClassifier(training_X, training_Y):
     model.fit(training_X, training_Y)
     return model
 
-# returns a trained MLP Regressor
-def get_trained_MLPRegressor(training_X, training_Y):
-    from sklearn.neural_network import MLPRegressor
-    model = MLPRegressor(random_state=3)
+# returns a trained DecisionTreeClassifier
+def get_trained_DecisionTreeClassifier(training_X, training_Y):
+    from sklearn.tree import DecisionTreeClassifier
+    model = DecisionTreeClassifier(random_state=3)
     model.fit(training_X, training_Y)
     return model
 #### END EXTRA CREDIT ####
