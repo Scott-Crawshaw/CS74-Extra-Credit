@@ -13,10 +13,10 @@ pd.options.mode.chained_assignment = None
 
 # create a processed csv file which has one row per product with the appropriate features
 # for the training set
-#createProcessedFile(True)
+createProcessedFile(True)
 
 # create the processed csv file with one row per product for the test set
-#createProcessedFile(False)
+createProcessedFile(False)
 
 # read training data
 training = pd.read_csv('Groceries_Processed_Training_Data_Vader.csv')
